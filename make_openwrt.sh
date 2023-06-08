@@ -2,6 +2,25 @@
 
 # debian
 
+# 设置代码仓库地址
+repo_url="https://github.com/coolsnowwolf/lede.git"
+
+# 判断代码仓库是否已经被clone
+if [ ! -d "lede" ]; then
+  # 如果没有clone，则执行clone命令
+  echo "Code repository not found, cloning..."
+  git clone $repo_url
+else
+  # 如果已经被clone，则执行pull命令进行更新
+  echo "Code repository found, updating..."
+  cd lede
+  git pull
+  cd ..
+fi
+
+cp a.config lede/.config
+cd lede/
+
 sudo sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list
 sudo apt update -y
 sudo apt full-upgrade -y
@@ -19,16 +38,14 @@ sed -i '$a src-git small https://github.com/kenzok8/small' feeds.conf.default
 ./scripts/feeds update -a
 ./scripts/feeds install -a
 
-rm -rf 3hu5E6ONsbpG_coonfig
-git clone https://github.com/dixexi/3hu5E6ONsbpG_coonfig.git
-cp 3hu5E6ONsbpG_coonfig/temple.config .config
-
 make download
 make FORCE_UNSAFE_CONFIGURE=1 V=s
 
+cd ../
 rm -rf docker-openwrt/
 mkdir docker-openwrt/
+cp lede/openwrt-x86-64-generic-ext4-rootfs.img.gz docker-openwrt/
+cp zabbix_agentd.conf docker-openwrt/
+cp Dockerfile docker-openwrt/
 cd docker-openwrt/
-cp /home/镜像文件 ./
-cp ../3hu5E6ONsbpG_coonfig/zabbix_agentd.conf ./
 docker build -t vrouter:test .
