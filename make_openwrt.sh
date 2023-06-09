@@ -77,7 +77,7 @@ sed -i '$a src-git small https://github.com/kenzok8/small' feeds.conf.default
 ./scripts/feeds update -a
 ./scripts/feeds install -a
 
-make download -j$num_jobs
+make download V=s -j$num_jobs
 make FORCE_UNSAFE_CONFIGURE=1 V=s -j$num_jobs
 if [ $? -ne 0 ]; then
   echo "ERROR: make command failed"
