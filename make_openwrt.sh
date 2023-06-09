@@ -61,9 +61,9 @@ cp a.config lede/.config
 cd lede/
 
 sudo sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list
-sudo apt update -y
-sudo apt full-upgrade -y
-sudo apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
+sudo apt-get update -y
+sudo apt-get full-upgrade -y
+sudo apt-get install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
 bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib \
 git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev \
 libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool lrzsz \
