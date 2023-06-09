@@ -2,6 +2,45 @@
 
 # debian
 
+usage() {
+  echo "usage: $0 [-j NUM_JOBS] [-d] [-h]"
+  echo ""
+  echo "Build script for my project."
+  echo ""
+  echo "optional arguments:"
+  echo "  -j NUM_JOBS   number of concurrent jobs for make"
+  echo "  -d            build inside a Docker container"
+  echo "  -h            show this help message and exit"
+}
+
+while getopts ":j:dh" opt; do
+  case ${opt} in
+    j )
+      num_jobs=$OPTARG
+      ;;
+    d )
+      docker_build=true
+      ;;
+    h )
+      usage
+      exit 0
+      ;;
+    \? )
+     echo "Invalid option: -$OPTARG" 1>&2
+     usage
+     exit 1
+     ;;
+    : )
+     echo "Option -$OPTARG requires an argument." 1>&2
+     usage
+     exit 1
+     ;;
+  esac
+done
+shift $((OPTIND -1))
+
+num_jobs=${num_jobs:-$(nproc)}
+
 # 设置代码仓库地址
 repo_url="https://github.com/coolsnowwolf/lede.git"
 
@@ -38,14 +77,21 @@ sed -i '$a src-git small https://github.com/kenzok8/small' feeds.conf.default
 ./scripts/feeds update -a
 ./scripts/feeds install -a
 
-make download
-make FORCE_UNSAFE_CONFIGURE=1 V=s
+make download -j$num_jobs
+make FORCE_UNSAFE_CONFIGURE=1 V=s -j$num_jobs
+if [ $? -ne 0 ]; then
+  echo "ERROR: make command failed"
+  exit 1
+fi
 
-cd ../
-rm -rf docker-openwrt/
-mkdir docker-openwrt/
-cp lede/openwrt-x86-64-generic-ext4-rootfs.img.gz docker-openwrt/
-cp zabbix_agentd.conf docker-openwrt/
-cp Dockerfile docker-openwrt/
-cd docker-openwrt/
-docker build -t vrouter:test .
+if [ "$docker_build" = true ]; then
+  cd ../
+  rm -rf docker-openwrt/
+  mkdir docker-openwrt/
+  cp lede/openwrt-x86-64-generic-ext4-rootfs.img.gz docker-openwrt/
+  cp zabbix_agentd.conf docker-openwrt/
+  cp Dockerfile docker-openwrt/
+  cd docker-openwrt/
+  docker build -t vrouter:test .
+fi
+
