@@ -13,13 +13,16 @@ usage() {
   echo "  -h            show this help message and exit"
 }
 
-while getopts ":j:dh" opt; do
+while getopts ":j:cdh" opt; do
   case ${opt} in
     j )
       num_jobs=$OPTARG
       ;;
     d )
       docker_build=true
+      ;;
+    c )
+      clean_build=true
       ;;
     h )
       usage
@@ -70,6 +73,10 @@ libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-d
 mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pyelftools \
 libpython3-dev qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip \
 vim wget xmlto xxd zlib1g-dev
+
+if [ "$clean_build" = true ]; then
+  make clean
+fi
 
 sed -i '$a src-git kenzo https://github.com/kenzok8/openwrt-packages' feeds.conf.default
 sed -i '$a src-git small https://github.com/kenzok8/small' feeds.conf.default
